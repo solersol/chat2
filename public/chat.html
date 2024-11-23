@@ -42,44 +42,52 @@
         <button type="submit">Send</button>
     </form>
     <!-- Ensure Socket.IO library is loaded -->
-    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
     <script>
-        const socket = io({
-            path: '/socket.io' // Ensure this matches the server namespace
-        });
-
-        const chatForm = document.getElementById('chat-form');
+        // Select form and inputs AFTER they are rendered
+        const chatForm = document.getElementById('chat-form'); // Make sure the element exists in your HTML
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
+    
+        // Extract username from URL
         const username = new URLSearchParams(window.location.search).get('username') || 'Anonymous';
-
+    
+        // Connect to the WebSocket server
+        const socket = io({
+            path: '/socket.io' // Ensure this matches the server configuration
+        });
+    
         // Listen for connection success
         socket.on('connect', () => {
             console.log('Connected to WebSocket server');
         });
-
+    
         // Handle connection errors
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
         });
-
-        // Display incoming messages
+    
+        // Listen for incoming chat messages
         socket.on('chat message', (data) => {
             const message = document.createElement('div');
             message.textContent = `${data.username}: ${data.message}`;
             messagesDiv.appendChild(message);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
-
-        // Send message when form is submitted
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const message = messageInput.value.trim();
-            if (message) {
-                socket.emit('chat message', { username, message });
-                messageInput.value = '';
-            }
-        });
+    
+        // Handle form submission
+        if (chatForm) {
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (message) {
+                    socket.emit('chat message', { username, message });
+                    messageInput.value = '';
+                }
+            });
+        } else {
+            console.error("chatForm is not defined in your HTML.");
+        }
     </script>
+    
 </body>
 </html>
