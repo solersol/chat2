@@ -1,4 +1,3 @@
-// api/socket.js
 import { Server } from 'socket.io';
 
 let io;
@@ -9,7 +8,7 @@ export default function handler(req, res) {
         if (!io) {
             console.log("Initializing Socket.IO...");
             io = new Server(res.socket.server, {
-                path: "/socket.io", // Ensure namespace path is correct
+                path: "/socket.io" // Ensure correct namespace path
             });
             res.socket.server.io = io;
 
@@ -19,7 +18,7 @@ export default function handler(req, res) {
 
                 // Listen for incoming chat messages
                 socket.on('chat message', (data) => {
-                    console.log('Message received:', data); // Debugging
+                    console.log('Message received:', data);
                     io.emit('chat message', data); // Broadcast to all clients
                 });
 
@@ -29,10 +28,9 @@ export default function handler(req, res) {
                 });
             });
         }
-
         res.end();
     } catch (error) {
-        console.error("Error in Socket.IO handler:", error); // Log detailed error
-        res.status(500).send("Internal Server Error"); // Return 500 status code
+        console.error("Error in Socket.IO handler:", error);
+        res.status(500).send("Internal Server Error");
     }
 }
