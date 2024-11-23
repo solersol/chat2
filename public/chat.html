@@ -41,47 +41,45 @@
         <input id="message-input" type="text" placeholder="Type your message..." autocomplete="off" required />
         <button type="submit">Send</button>
     </form>
+    <!-- Ensure Socket.IO library is loaded -->
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
     <script>
-        // Select the chat form and ensure it's defined
+        const socket = io({
+            path: '/socket.io' // Ensure this matches the server namespace
+        });
+
         const chatForm = document.getElementById('chat-form');
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
-    
-        // Ensure username is extracted from the URL
         const username = new URLSearchParams(window.location.search).get('username') || 'Anonymous';
-    
-        const socket = io({
-            path: '/socket.io' // Correct namespace path
-        });
-    
-        // Listen for connection errors
+
+        // Listen for connection success
         socket.on('connect', () => {
             console.log('Connected to WebSocket server');
         });
-    
+
+        // Handle connection errors
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
         });
-    
-        // Listen for chat messages and display them
+
+        // Display incoming messages
         socket.on('chat message', (data) => {
             const message = document.createElement('div');
             message.textContent = `${data.username}: ${data.message}`;
             messagesDiv.appendChild(message);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
-    
-        // Handle form submission
+
+        // Send message when form is submitted
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = messageInput.value.trim();
             if (message) {
-                socket.emit('chat message', { username, message }); // Send message
-                messageInput.value = ''; // Clear input field
+                socket.emit('chat message', { username, message });
+                messageInput.value = '';
             }
         });
     </script>
-    
-    
 </body>
 </html>
